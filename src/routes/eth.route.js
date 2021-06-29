@@ -1,25 +1,25 @@
-import { ethers, BigNumber } from 'ethers';
-import express from 'express';
+import { ethers, BigNumber } from "ethers";
+import express from "express";
 
-import { getParamData, latency, statusMessages } from '../services/utils';
-import Ethereum from '../services/eth';
-import Fees from '../services/fees';
-import { logger } from '../services/logger';
+import { getParamData, latency, statusMessages } from "../services/utils";
+import Ethereum from "../services/eth";
+import Fees from "../services/fees";
+import { logger } from "../services/logger";
 
-const debug = require('debug')('router');
+const debug = require("debug")("router");
 const router = express.Router();
 const globalConfig =
-  require('../services/configuration_manager').configManagerInstance;
-const eth = new Ethereum(globalConfig.getConfig('ETHEREUM_CHAIN'));
+  require("../services/configuration_manager").configManagerInstance;
+const eth = new Ethereum(globalConfig.getConfig("ETHEREUM_CHAIN"));
 const spenders = {
-  balancer: globalConfig.getConfig('EXCHANGE_PROXY'),
-  uniswap: globalConfig.getConfig('UNISWAP_ROUTER'),
-  uniswapV3Router: globalConfig.getConfig('UNISWAP_V3_ROUTER'),
-  uniswapV3NFTManager: globalConfig.getConfig('UNISWAP_V3_NFT_MANAGER')
+  balancer: globalConfig.getConfig("EXCHANGE_PROXY"),
+  uniswap: globalConfig.getConfig("UNISWAP_ROUTER"),
+  uniswapV3Router: globalConfig.getConfig("UNISWAP_V3_ROUTER"),
+  uniswapV3NFTManager: globalConfig.getConfig("UNISWAP_V3_NFT_MANAGER"),
 };
 const fees = new Fees();
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   /*
     POST /
   */
@@ -27,11 +27,11 @@ router.post('/', async (req, res) => {
     network: eth.network,
     rpcUrl: eth.provider.connection.url,
     connection: true,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 });
 
-router.post('/balances', async (req, res) => {
+router.post("/balances", async (req, res) => {
   /*
       POST: /balances
       x-www-form-urlencoded: {
@@ -47,11 +47,12 @@ router.post('/balances', async (req, res) => {
     wallet = new ethers.Wallet(privateKey, eth.provider);
   } catch (err) {
     logger.error(req.originalUrl, { message: err });
+    console.error(req.originalUrl, { message: err });
     let reason;
-    err.reason ? (reason = err.reason) : (reason = 'Error getting wallet');
+    err.reason ? (reason = err.reason) : (reason = "Error getting wallet");
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
     return;
   }
@@ -79,35 +80,36 @@ router.post('/balances', async (req, res) => {
           );
         } else {
           const err = `Token contract info for ${symbol} not found`;
-          logger.error('Token info not found', { message: err });
+          logger.error("Token info not found", { message: err });
           debug(err);
         }
       })
     ).then(() => {
-      debug('eth.route - Get Account Balance', {
-        message: JSON.stringify(tokenList)
+      debug("eth.route - Get Account Balance", {
+        message: JSON.stringify(tokenList),
       });
       res.status(200).json({
         network: eth.network,
         timestamp: initTime,
         latency: latency(initTime, Date.now()),
-        balances: balances
+        balances: balances,
       });
     });
   } catch (err) {
     logger.error(req.originalUrl, { message: err });
+    console.error(req.originalUrl, { message: err });
     let reason;
     err.reason
       ? (reason = err.reason)
       : (reason = statusMessages.operation_error);
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
   }
 });
 
-router.post('/allowances', async (req, res) => {
+router.post("/allowances", async (req, res) => {
   /*
       POST: /allowances
       x-www-form-urlencoded: {
@@ -126,10 +128,10 @@ router.post('/allowances', async (req, res) => {
   } catch (err) {
     logger.error(req.originalUrl, { message: err });
     let reason;
-    err.reason ? (reason = err.reason) : (reason = 'Error getting wallet');
+    err.reason ? (reason = err.reason) : (reason = "Error getting wallet");
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
     return;
   }
@@ -156,15 +158,15 @@ router.post('/allowances', async (req, res) => {
         );
       })
     ).then(() => {
-      logger.info('eth.route - Getting allowances', {
-        message: JSON.stringify(tokenList)
+      logger.info("eth.route - Getting allowances", {
+        message: JSON.stringify(tokenList),
       });
       res.status(200).json({
         network: eth.network,
         timestamp: initTime,
         latency: latency(initTime, Date.now()),
         spender: spender,
-        approvals: approvals
+        approvals: approvals,
       });
     });
   } catch (err) {
@@ -175,12 +177,12 @@ router.post('/allowances', async (req, res) => {
       : (reason = statusMessages.operation_error);
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
   }
 });
 
-router.post('/balances-2', async (req, res) => {
+router.post("/balances-2", async (req, res) => {
   /*
       POST: /balances
       x-www-form-urlencoded: {
@@ -197,20 +199,20 @@ router.post('/balances-2', async (req, res) => {
     wallet = new ethers.Wallet(privateKey, eth.provider);
   } catch (err) {
     let reason;
-    err.reason ? (reason = err.reason) : (reason = 'Error getting wallet');
+    err.reason ? (reason = err.reason) : (reason = "Error getting wallet");
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
     return;
   }
   let tokenAddressList;
   if (paramData.tokenAddressList) {
-    tokenAddressList = paramData.tokenAddressList.split(',');
+    tokenAddressList = paramData.tokenAddressList.split(",");
   }
   let tokenDecimalList;
   if (paramData.tokenDecimalList) {
-    tokenDecimalList = paramData.tokenDecimalList.split(',');
+    tokenDecimalList = paramData.tokenDecimalList.split(",");
   }
 
   const balances = {};
@@ -230,7 +232,7 @@ router.post('/balances-2', async (req, res) => {
         network: eth.network,
         timestamp: initTime,
         latency: latency(initTime, Date.now()),
-        balances: balances
+        balances: balances,
       });
     });
   } catch (err) {
@@ -240,12 +242,12 @@ router.post('/balances-2', async (req, res) => {
       : (reason = statusMessages.operation_error);
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
   }
 });
 
-router.post('/allowances-2', async (req, res) => {
+router.post("/allowances-2", async (req, res) => {
   /*
       POST: /allowances
       x-www-form-urlencoded: {
@@ -264,20 +266,20 @@ router.post('/allowances-2', async (req, res) => {
     wallet = new ethers.Wallet(privateKey, eth.provider);
   } catch (err) {
     let reason;
-    err.reason ? (reason = err.reason) : (reason = 'Error getting wallet');
+    err.reason ? (reason = err.reason) : (reason = "Error getting wallet");
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
     return;
   }
   let tokenAddressList;
   if (paramData.tokenAddressList) {
-    tokenAddressList = paramData.tokenAddressList.split(',');
+    tokenAddressList = paramData.tokenAddressList.split(",");
   }
   let tokenDecimalList;
   if (paramData.tokenDecimalList) {
-    tokenDecimalList = paramData.tokenDecimalList.split(',');
+    tokenDecimalList = paramData.tokenDecimalList.split(",");
   }
 
   const approvals = {};
@@ -298,7 +300,7 @@ router.post('/allowances-2', async (req, res) => {
         timestamp: initTime,
         latency: latency(initTime, Date.now()),
         spender: spender,
-        approvals: approvals
+        approvals: approvals,
       });
     });
   } catch (err) {
@@ -308,12 +310,12 @@ router.post('/allowances-2', async (req, res) => {
       : (reason = statusMessages.operation_error);
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
   }
 });
 
-router.post('/approve', async (req, res) => {
+router.post("/approve", async (req, res) => {
   /*
       POST: /approve
       x-www-form-urlencoded: {
@@ -334,10 +336,10 @@ router.post('/approve', async (req, res) => {
   } catch (err) {
     logger.error(req.originalUrl, { message: err });
     let reason;
-    err.reason ? (reason = err.reason) : (reason = 'Error getting wallet');
+    err.reason ? (reason = err.reason) : (reason = "Error getting wallet");
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
     return;
   }
@@ -375,7 +377,7 @@ router.post('/approve', async (req, res) => {
       tokenAddress: tokenAddress,
       spender: spender,
       amount: amount / (1e18).toString(),
-      approval: approval
+      approval: approval,
     });
   } catch (err) {
     logger.error(req.originalUrl, { message: err });
@@ -385,12 +387,12 @@ router.post('/approve', async (req, res) => {
       : (reason = statusMessages.operation_error);
     res.status(500).json({
       error: reason,
-      message: err
+      message: err,
     });
   }
 });
 
-router.post('/poll', async (req, res) => {
+router.post("/poll", async (req, res) => {
   const initTime = Date.now();
   const paramData = getParamData(req.body);
   const txHash = paramData.txHash;
@@ -405,7 +407,7 @@ router.post('/poll', async (req, res) => {
     receipt.logs = txReceipt.logs;
   }
   logger.info(`eth.route - Get TX Receipt: ${txHash}`, {
-    message: JSON.stringify(receipt)
+    message: JSON.stringify(receipt),
   });
   res.status(200).json({
     network: eth.network,
@@ -413,7 +415,7 @@ router.post('/poll', async (req, res) => {
     latency: latency(initTime, Date.now()),
     txHash: txHash,
     confirmed: confirmed,
-    receipt: receipt
+    receipt: receipt,
   });
   return txReceipt;
 });

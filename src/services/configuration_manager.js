@@ -47,7 +47,12 @@ export default class ConfigurationManager {
   }
 
   getConfig(key) {
-    return this.configs.get(key);
+    const value = this.configs.get(key);
+    if (value) {
+      return value;
+    } else {
+      console.warn("The setting: " + key + " in the configuration is undefined.");
+    }
   }
 
   getCoreConfig(key) {
