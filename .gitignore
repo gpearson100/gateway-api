@@ -22,6 +22,7 @@ dist/
 # misc
 logs/
 package-lock.json
+hbot_logs
 
 # cert
 *.pem
